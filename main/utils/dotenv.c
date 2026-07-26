@@ -66,15 +66,29 @@ void dotenv_init(void)
 
     for (; p < end; p++) {
         if (*p == '\n' || *p == '\0') {
-            size_t len = p - line_start;
-            if (len > 0) parse_line((const char *)line_start, len);
+            const unsigned char *ls = line_start;
+            while (ls < p && (*ls == ' ' || *ls == '\t')) ls++;
+            size_t len = p - ls;
+            if (len > 0 && *ls != '#') {
+                parse_line((const char *)ls, len);
+            }
             line_start = p + 1;
             if (*p == '\0') break;
+        }
+    }
+    if (line_start < end) {
+        const unsigned char *ls = line_start;
+        while (ls < end && (*ls == ' ' || *ls == '\t')) ls++;
+        size_t len = end - ls;
+        if (len > 0 && *ls != '#') {
+            parse_line((const char *)ls, len);
         }
     }
 
     ESP_LOGI(TAG, "Parsed %d entries", entry_count);
 }
+
+#include <stdlib.h>
 
 const char *dotenv_get(const char *key)
 {
@@ -83,4 +97,11 @@ const char *dotenv_get(const char *key)
             return entries[i].val;
     }
     return NULL;
+}
+
+int dotenv_get_int(const char *key, int default_value)
+{
+    const char *val = dotenv_get(key);
+    if (!val) return default_value;
+    return atoi(val);
 }

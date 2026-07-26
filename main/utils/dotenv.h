@@ -18,6 +18,8 @@ void dotenv_init(void);
  */
 const char *dotenv_get(const char *key);
 
+int dotenv_get_int(const char *key, int default_value);
+
 #ifdef __cplusplus
 }
 #endif

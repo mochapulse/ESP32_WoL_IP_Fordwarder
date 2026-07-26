@@ -14,7 +14,11 @@ esp_err_t wifi_disconnect(void);
 
 bool wifi_health(void);
 
+esp_err_t wifi_retry(void);
+
 const char *check_LAN_ip(void);
+
+const char *get_LAN_ip(void);
 
 #ifdef __cplusplus
 }

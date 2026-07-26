@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP32 WoL Forwarder</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>ESP32 WoL IP Forwarder</h1>
+    <p class="tagline">Embedded web server running on the chip</p>
+
+    <section class="card">
+      <h2>Status</h2>
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="label">Wi-Fi</span>
+          <span id="wifi-status" class="value">--</span>
+        </div>
+        <div class="status-item">
+          <span class="label">LAN IP</span>
+          <span id="lan-ip" class="value">--</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Actions</h2>
+      <button id="refresh-btn">Refresh Status</button>
+    </section>
+
+    <footer>
+      <p>Served from flash &mdash; no filesystem needed.</p>
+    </footer>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
