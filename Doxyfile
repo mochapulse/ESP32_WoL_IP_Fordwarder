@@ -110,7 +110,9 @@ WARN_FORMAT            = "$file:$line: $text"
 WARN_LINE_FORMAT       = "at line $line"
 WARN_LOGFILE           =
 
-INPUT                  = main
+INPUT                  = main \
+                         doc
+USE_MDFILE_AS_MAINPAGE = doc/mainpage.md
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.h \
