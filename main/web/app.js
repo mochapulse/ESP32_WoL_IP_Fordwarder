@@ -79,20 +79,18 @@ function switchTab(tabName) {
   document.querySelectorAll(".tab").forEach(function(t) {
     t.classList.remove("active");
   });
-  document.querySelectorAll(".menu-item").forEach(function(m) {
-    m.classList.remove("active");
+  document.querySelectorAll(".menu-item, .bottombar-item").forEach(function(el) {
+    if (el.dataset.tab === tabName) el.classList.add("active");
+    else el.classList.remove("active");
   });
 
   var tab = document.getElementById("tab-" + tabName);
   if (tab) tab.classList.add("active");
-
-  var menu = document.querySelector('.menu-item[data-tab="' + tabName + '"]');
-  if (menu) menu.classList.add("active");
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  document.querySelectorAll(".menu-item").forEach(function(item) {
-    item.addEventListener("click", function() {
+  document.querySelectorAll(".menu-item, .bottombar-item").forEach(function(el) {
+    el.addEventListener("click", function() {
       switchTab(this.dataset.tab);
     });
   });

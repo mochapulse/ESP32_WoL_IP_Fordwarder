@@ -2,24 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>ESP32 WoL Forwarder</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <div class="layout">
-    <nav class="sidebar">
+    <nav class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h1>ESP32 WoL</h1>
         <p>IP Forwarder</p>
       </div>
       <ul class="menu">
         <li class="menu-item active" data-tab="status">
-          <span class="menu-icon">&#9632;</span>
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
           Status
         </li>
         <li class="menu-item" data-tab="wol">
-          <span class="menu-icon">&#9733;</span>
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           WoL Config
         </li>
       </ul>
@@ -194,6 +194,18 @@
       </section>
     </main>
   </div>
+
+  <nav class="bottombar" id="bottombar">
+    <button class="bottombar-item active" data-tab="status">
+      <svg class="bottombar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Status
+    </button>
+    <button class="bottombar-item" data-tab="wol">
+      <svg class="bottombar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Wol
+    </button>
+  </nav>
+
   <script src="/app.js"></script>
 </body>
 </html>
