@@ -5,9 +5,16 @@
 #include <string.h>
 
 #include "cJSON.h"
+#include "esp_app_desc.h"
+#include "esp_chip_info.h"
 #include "esp_err.h"
+#include "esp_flash.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
+#include "esp_mac.h"
+#include "esp_private/esp_clk.h"
+#include "esp_timer.h"
+#include "freertos/task.h"
 #include "wifi_connect.h"
 
 static const char *TAG = "web_API";
@@ -48,14 +55,73 @@ static esp_err_t static_handler(httpd_req_t *req)
     return ESP_FAIL;
 }
 
+static const char *chip_model_str(esp_chip_model_t model)
+{
+    switch (model) {
+    case CHIP_ESP32:   return "ESP32";
+    case CHIP_ESP32S2: return "ESP32-S2";
+    case CHIP_ESP32S3: return "ESP32-S3";
+    case CHIP_ESP32C3: return "ESP32-C3";
+    case CHIP_ESP32C2: return "ESP32-C2";
+    case CHIP_ESP32C6: return "ESP32-C6";
+    case CHIP_ESP32H2: return "ESP32-H2";
+    case CHIP_ESP32P4: return "ESP32-P4";
+    case CHIP_ESP32C5: return "ESP32-C5";
+    default:           return "Unknown";
+    }
+}
+
 static esp_err_t status_handler(httpd_req_t *req)
 {
     const char *lan_ip = get_LAN_ip();
 
     cJSON *root = cJSON_CreateObject();
+
     cJSON_AddBoolToObject(root, "wifi", wifi_health());
     cJSON_AddStringToObject(root, "ip", lan_ip ? lan_ip : "");
+
     cJSON_AddNumberToObject(root, "heap_free", esp_get_free_heap_size());
+    cJSON_AddNumberToObject(root, "heap_min_free", esp_get_minimum_free_heap_size());
+    cJSON_AddNumberToObject(root, "heap_total", heap_caps_get_total_size(MALLOC_CAP_8BIT));
+
+    cJSON_AddNumberToObject(root, "free_stack", uxTaskGetStackHighWaterMark(NULL));
+    cJSON_AddNumberToObject(root, "task_count", uxTaskGetNumberOfTasks());
+    cJSON_AddNumberToObject(root, "uptime", (double)(esp_timer_get_time() / 1000000ULL));
+
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+    cJSON *features = cJSON_CreateArray();
+    if (chip_info.features & CHIP_FEATURE_EMB_FLASH) cJSON_AddItemToArray(features, cJSON_CreateString("Embedded Flash"));
+    if (chip_info.features & CHIP_FEATURE_WIFI_BGN) cJSON_AddItemToArray(features, cJSON_CreateString("Wi-Fi b/g/n"));
+    if (chip_info.features & CHIP_FEATURE_BT)      cJSON_AddItemToArray(features, cJSON_CreateString("BT"));
+    if (chip_info.features & CHIP_FEATURE_BLE)     cJSON_AddItemToArray(features, cJSON_CreateString("BLE"));
+    if (chip_info.features & CHIP_FEATURE_IEEE802154) cJSON_AddItemToArray(features, cJSON_CreateString("802.15.4"));
+    cJSON_AddItemToObject(root, "chip_features", features);
+    cJSON_AddStringToObject(root, "chip_model", chip_model_str(chip_info.model));
+    cJSON_AddNumberToObject(root, "chip_cores", chip_info.cores);
+    cJSON_AddNumberToObject(root, "chip_revision", chip_info.revision);
+    cJSON_AddNumberToObject(root, "cpu_freq", esp_clk_cpu_freq());
+
+    const esp_app_desc_t *app_info = esp_app_get_description();
+    if (app_info) {
+        cJSON_AddStringToObject(root, "app_name", app_info->project_name);
+        cJSON_AddStringToObject(root, "app_version", app_info->version);
+        cJSON_AddStringToObject(root, "app_date", app_info->date);
+        cJSON_AddStringToObject(root, "app_time", app_info->time);
+    }
+
+    uint32_t flash_size = 0;
+    if (esp_flash_get_size(NULL, &flash_size) == ESP_OK) {
+        cJSON_AddNumberToObject(root, "flash_size", flash_size);
+    }
+
+    uint8_t mac[6];
+    if (esp_read_mac(mac, ESP_MAC_WIFI_STA) == ESP_OK) {
+        char mac_str[18];
+        snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
+                 mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+        cJSON_AddStringToObject(root, "mac", mac_str);
+    }
 
     char *json_str = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
@@ -69,19 +135,26 @@ static esp_err_t status_handler(httpd_req_t *req)
 
 void web_API_init(httpd_handle_t server)
 {
-    httpd_uri_t wildcard = {
-        .uri     = "/*",
-        .method  = HTTP_GET,
-        .handler = static_handler,
-    };
-    httpd_register_uri_handler(server, &wildcard);
-
     httpd_uri_t status_uri = {
         .uri     = "/api/status",
         .method  = HTTP_GET,
         .handler = status_handler,
     };
     httpd_register_uri_handler(server, &status_uri);
+
+    httpd_uri_t root_uri = {
+        .uri     = "/",
+        .method  = HTTP_GET,
+        .handler = static_handler,
+    };
+    httpd_register_uri_handler(server, &root_uri);
+
+    httpd_uri_t wildcard = {
+        .uri     = "/*",
+        .method  = HTTP_GET,
+        .handler = static_handler,
+    };
+    httpd_register_uri_handler(server, &wildcard);
 
     ESP_LOGI(TAG, "Endpoints registered");
 }

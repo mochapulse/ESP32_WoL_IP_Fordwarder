@@ -7,32 +7,192 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>ESP32 WoL IP Forwarder</h1>
-    <p class="tagline">Embedded web server running on the chip</p>
-
-    <section class="card">
-      <h2>Status</h2>
-      <div class="status-grid">
-        <div class="status-item">
-          <span class="label">Wi-Fi</span>
-          <span id="wifi-status" class="value">--</span>
-        </div>
-        <div class="status-item">
-          <span class="label">LAN IP</span>
-          <span id="lan-ip" class="value">--</span>
-        </div>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <h1>ESP32 WoL</h1>
+        <p>IP Forwarder</p>
       </div>
-    </section>
+      <ul class="menu">
+        <li class="menu-item active" data-tab="status">
+          <span class="menu-icon">&#9632;</span>
+          Status
+        </li>
+        <li class="menu-item" data-tab="wol">
+          <span class="menu-icon">&#9733;</span>
+          WoL Config
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        <small id="sidebar-ip">--</small>
+      </div>
+    </nav>
 
-    <section class="card">
-      <h2>Actions</h2>
-      <button id="refresh-btn">Refresh Status</button>
-    </section>
+    <main class="content">
+      <section id="tab-status" class="tab active">
+        <h2>Device Status</h2>
+        <div id="status-error" class="error-banner hidden">Failed to reach device</div>
 
-    <footer>
-      <p>Served from flash &mdash; no filesystem needed.</p>
-    </footer>
+        <div class="card">
+          <h3>Network</h3>
+          <div class="status-grid">
+            <div class="status-item">
+              <span class="label">Wi-Fi</span>
+              <span id="wifi-status" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">LAN IP</span>
+              <span id="lan-ip" class="value">--</span>
+            </div>
+            <div class="status-item full-width">
+              <span class="label">MAC Address</span>
+              <span id="mac" class="value mono-sm">--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Memory</h3>
+          <div class="status-grid">
+            <div class="status-item">
+              <span class="label">Heap Free</span>
+              <span id="heap-free" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Heap Total</span>
+              <span id="heap-total" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Heap Min Free</span>
+              <span id="heap-min-free" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Free Stack</span>
+              <span id="free-stack" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Tasks</span>
+              <span id="task-count" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Uptime</span>
+              <span id="uptime" class="value">--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Device</h3>
+          <div class="status-grid">
+            <div class="status-item">
+              <span class="label">Chip</span>
+              <span id="chip-model" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Cores</span>
+              <span id="chip-cores" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Revision</span>
+              <span id="chip-revision" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">CPU Freq</span>
+              <span id="cpu-freq" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Flash Size</span>
+              <span id="flash-size" class="value">--</span>
+            </div>
+            <div class="status-item full-width">
+              <span class="label">Chip Features</span>
+              <span id="chip-features" class="value">--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Firmware</h3>
+          <div class="status-grid">
+            <div class="status-item">
+              <span class="label">App Name</span>
+              <span id="app-name" class="value">--</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Version</span>
+              <span id="app-version" class="value">--</span>
+            </div>
+            <div class="status-item full-width">
+              <span class="label">Build Date</span>
+              <span id="app-build" class="value mono-sm">--</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-wol" class="tab">
+        <h2>Wake-on-LAN Configuration</h2>
+
+        <div class="card">
+          <h3>Target Devices</h3>
+          <div id="device-list" class="placeholder-list">
+            <div class="placeholder-row">
+              <span class="placeholder-icon">&#9675;</span>
+              <div class="placeholder-text">
+                <div class="placeholder-line w-60"></div>
+                <div class="placeholder-line w-40"></div>
+              </div>
+            </div>
+            <div class="placeholder-row">
+              <span class="placeholder-icon">&#9675;</span>
+              <div class="placeholder-text">
+                <div class="placeholder-line w-50"></div>
+                <div class="placeholder-line w-30"></div>
+              </div>
+            </div>
+            <div class="placeholder-row">
+              <span class="placeholder-icon">&#9675;</span>
+              <div class="placeholder-text">
+                <div class="placeholder-line w-55"></div>
+                <div class="placeholder-line w-35"></div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-secondary" disabled>+ Add Device</button>
+        </div>
+
+        <div class="card">
+          <h3>IP Forwarding Rules</h3>
+          <div id="rule-list" class="placeholder-list">
+            <div class="placeholder-row">
+              <span class="placeholder-icon">&#8596;</span>
+              <div class="placeholder-text">
+                <div class="placeholder-line w-70"></div>
+                <div class="placeholder-line w-35"></div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-secondary" disabled>+ Add Rule</button>
+        </div>
+
+        <div class="card">
+          <h3>Broadcast Settings</h3>
+          <div class="form-group">
+            <label>UDP Port</label>
+            <input type="number" value="9" disabled>
+          </div>
+          <div class="form-group">
+            <label>Broadcast IP</label>
+            <input type="text" value="255.255.255.255" disabled>
+          </div>
+          <div class="form-group">
+            <label>Interface</label>
+            <input type="text" value="WLAN" disabled>
+          </div>
+          <p class="hint">Configuration coming soon.</p>
+        </div>
+      </section>
+    </main>
   </div>
   <script src="/app.js"></script>
 </body>

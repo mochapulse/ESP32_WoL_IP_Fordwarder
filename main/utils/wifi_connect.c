@@ -167,6 +167,16 @@ const char *check_LAN_ip(void)
     return s_ip_str;
 }
 
+const char *wifi_wait_for_ip(uint32_t timeout_ms)
+{
+    EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_GOT_IP_BIT,
+                                           pdFALSE, pdTRUE, pdMS_TO_TICKS(timeout_ms));
+    if (bits & WIFI_GOT_IP_BIT) {
+        return s_ip_str;
+    }
+    return NULL;
+}
+
 const char *get_LAN_ip(void)
 {
     if (wifi_health()) return s_ip_str;

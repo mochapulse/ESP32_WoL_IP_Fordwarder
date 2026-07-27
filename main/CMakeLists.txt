@@ -8,7 +8,7 @@ idf_component_register(SRCS "app.c"
                     EMBED_FILES "web/index.html"
                                 "web/style.css"
                                 "web/app.js"
-                    REQUIRES nvs_flash esp_wifi esp_netif esp_event esp_http_server cjson)
+                    REQUIRES nvs_flash esp_wifi esp_netif esp_event esp_http_server spi_flash esp_timer esp_app_format cjson)
 
 # EMBED_FILES skips dotfiles — embed .env manually with objcopy
 set(dotenv_obj "${CMAKE_CURRENT_BINARY_DIR}/dotenv.o")

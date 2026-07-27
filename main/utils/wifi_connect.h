@@ -18,6 +18,8 @@ esp_err_t wifi_retry(void);
 
 const char *check_LAN_ip(void);
 
+const char *wifi_wait_for_ip(uint32_t timeout_ms);
+
 const char *get_LAN_ip(void);
 
 #ifdef __cplusplus

@@ -26,6 +26,7 @@ esp_err_t web_start(void)
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = s_port;
+    config.uri_match_fn = httpd_uri_match_wildcard;
 
     esp_err_t ret = httpd_start(&s_server, &config);
     if (ret != ESP_OK) {

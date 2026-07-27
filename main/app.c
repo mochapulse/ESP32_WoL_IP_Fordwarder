@@ -27,8 +27,13 @@ void app_main(void)
     ESP_ERROR_CHECK(wifi_init(ssid, passwd));
     ESP_ERROR_CHECK(wifi_connect());
 
-    const char *lan_ip = check_LAN_ip();
-    ESP_LOGI(TAG, "LAN IP: %s", lan_ip);
+    const char *lan_ip = wifi_wait_for_ip(15000);
+    if (lan_ip) {
+        ESP_LOGI(TAG, "LAN IP: %s", lan_ip);
+    } else {
+        ESP_LOGW(TAG, "No IP yet, starting web server anyway");
+        lan_ip = "0.0.0.0";
+    }
 
     ESP_ERROR_CHECK(web_init(web_port));
     ESP_ERROR_CHECK(web_start());
