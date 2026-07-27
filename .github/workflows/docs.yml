@@ -33,7 +33,7 @@ jobs:
 
       - name: Build docs
         run: |
-          mkdir -p docs/doxygen
+          mkdir -p doc/doxygen
           doxygen Doxyfile
 
       - name: Upload artifact (PR preview)
@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: doxygen-html
-          path: docs/doxygen/html
+          path: doc/doxygen/html
           retention-days: 7
 
       - name: Deploy to GitHub Pages
@@ -49,6 +49,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/doxygen/html
+          publish_dir: doc/doxygen/html
           force_orphan: true
           commit_message: 'docs: deploy doxygen ${{ github.sha }}'

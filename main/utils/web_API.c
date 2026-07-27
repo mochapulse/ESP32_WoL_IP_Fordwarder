@@ -8,7 +8,7 @@
  *                     state, firmware metadata, and sends it as JSON.
  *
  * Embedded files are linked via objcopy-generated symbols
- * (_binary_<name>_start / _binary_<name>_end) declared here as extern.
+ * (\c _binary_\<name\>_start / \c _binary_\<name\>_end) declared here as extern.
  *
  * @note    esp_clk_cpu_freq() is pulled from esp_private/esp_clk.h because
  *          no public equivalent exists in ESP-IDF v6.0.2 for the *actual*

@@ -6,7 +6,7 @@ DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "ESP32 WoL IP Forwarder"
 PROJECT_BRIEF          = "Embedded firmware for ESP32 — Wi-Fi station, HTTP dashboard, Wake-on-LAN"
 PROJECT_LOGO           =
-OUTPUT_DIRECTORY       = docs/doxygen
+OUTPUT_DIRECTORY       = doc/doxygen
 CREATE_SUBDIRS         = NO
 ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
@@ -155,7 +155,6 @@ HTML_STYLESHEET        =
 HTML_EXTRA_STYLESHEET  =
 HTML_EXTRA_FILES       =
 HTML_COLORSTYLE        = AUTO_LIGHT
-# HTML_TIMESTAMP removed — obsolete in current doxygen
 HTML_DYNAMIC_MENUS     = YES
 HTML_DYNAMIC_SECTIONS  = NO
 HTML_INDEX_NUM_ENTRIES = 100
@@ -187,7 +186,6 @@ EXT_LINKS_IN_WINDOW    = NO
 OBFUSCATE_EMAILS       = YES
 HTML_FORMULA_FORMAT    = png
 FORMULA_FONTSIZE       = 10
-# FORMULA_TRANSPARENT removed — obsolete in current doxygen
 FORMULA_MACROFILE      =
 USE_MATHJAX            = NO
 MATHJAX_FORMAT         = HTML-CSS
@@ -234,8 +232,6 @@ DOT_NUM_THREADS        = 0
 DOT_COMMON_ATTR        = "fontname=Helvetica,fontsize=10"
 DOT_EDGE_ATTR          = "labelfontname=Helvetica,labelfontsize=10"
 DOT_NODE_ATTR          = "shape=box,height=0.2,width=0.4"
-# DOT_FONTNAME removed — obsolete in current doxygen
-# DOT_FONTSIZE removed — obsolete in current doxygen
 DOT_FONTPATH           =
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES
@@ -264,5 +260,4 @@ PLANTUML_INCLUDE_PATH  =
 DOT_GRAPH_MAX_NODES    = 50
 MAX_DOT_GRAPH_DEPTH    = 0
 DOT_MULTI_TARGETS      = NO
-# DOT_TRANSPARENT removed — obsolete in current doxygen
 DOT_CLEANUP            = YES

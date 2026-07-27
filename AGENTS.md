@@ -50,6 +50,23 @@ python3 "$IDF_PATH/tools/idf.py" flash -p /dev/ttyUSB0
 python3 "$IDF_PATH/tools/idf.py" -p /dev/ttyUSB0 flash monitor
 ```
 
+## Doxygen docs
+
+API docs are built with `doxygen` + `graphviz` (installed system-wide):
+
+```bash
+# Generate (output dir must exist first — doxygen cannot create it)
+mkdir -p doc/doxygen
+doxygen Doxyfile
+
+# Output: doc/doxygen/html/index.html (gitignored)
+```
+
+- Keep the `Doxyfile` **minimal** — only non-default values. Do NOT run
+  `doxygen -u Doxyfile`; it expands the file to ~3000 lines of defaults.
+- CI builds and deploys docs on push to `main` via `.github/workflows/docs.yml`.
+- Full guide: [doc/README.md](doc/README.md)
+
 ## Project path
 
 ```

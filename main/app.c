@@ -28,6 +28,18 @@ static const char *TAG = "APP";
 #define HEALTH_POLL_MS      5000   /**< Main-loop interval (ms)          */
 #define IP_WAIT_TIMEOUT_MS  15000  /**< Max wait for first DHCP lease    */
 
+/**
+ * @brief   Firmware entry point — bootstraps dotenv, Wi-Fi, and HTTP server.
+ *
+ * Loads credentials from the embedded `.env`, connects to Wi-Fi, waits for
+ * a DHCP lease, starts the HTTP dashboard, then enters an infinite
+ * health-monitoring loop that retries Wi-Fi and restarts the server on
+ * failure.
+ *
+ * @note    Warning logs use edge-detection to avoid console spam during
+ *          extended outages — a transition warning fires only once per
+ *          unhealthy episode.
+ */
 void app_main(void)
 {
     /* ── .env ────────────────────────────────────────────────── */

@@ -39,3 +39,6 @@ flasher_args.json
 # Debug
 *.elf
 *.map
+
+# Doxygen output
+doc/doxygen/
