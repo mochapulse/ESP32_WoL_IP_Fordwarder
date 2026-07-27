@@ -31,7 +31,9 @@ jobs:
           sudo apt-get install -y -qq doxygen graphviz
 
       - name: Build docs
-        run: doxygen Doxyfile
+        run: |
+          mkdir -p docs/doxygen
+          doxygen Doxyfile
 
       - name: Upload artifact (PR preview)
         if: github.event_name == 'pull_request'
