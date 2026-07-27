@@ -184,10 +184,22 @@ https://<your-username>.github.io/ESP32_WoL_IP_Fordwarder
 ### Local preview
 
 ```bash
+# Install (Ubuntu/Debian)
 sudo apt-get install doxygen graphviz
+
+# Install (macOS)
+brew install doxygen graphviz
+
+# Generate
 doxygen Doxyfile
-# open docs/doxygen/html/index.html
+
+# Open
+xdg-open docs/doxygen/html/index.html   # Linux
+open docs/doxygen/html/index.html       # macOS
 ```
+
+The output lives in `docs/doxygen/html/` (gitignored). `graphviz` is optional but
+enables call graphs and include dependency diagrams on the generated pages.
 
 ### GitHub Pages setup (one-time)
 

@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'main/**'
+      - 'doc/**'
       - 'Doxyfile'
       - '.github/workflows/docs.yml'
   pull_request:
