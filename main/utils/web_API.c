@@ -44,6 +44,10 @@ extern const uint8_t style_css_start[]  asm("_binary_style_css_start");
 extern const uint8_t style_css_end[]    asm("_binary_style_css_end");
 extern const uint8_t app_js_start[]     asm("_binary_app_js_start");
 extern const uint8_t app_js_end[]       asm("_binary_app_js_end");
+extern const uint8_t uplot_js_start[]   asm("_binary_uplot_min_js_start");
+extern const uint8_t uplot_js_end[]     asm("_binary_uplot_min_js_end");
+extern const uint8_t uplot_css_start[]  asm("_binary_uplot_min_css_start");
+extern const uint8_t uplot_css_end[]    asm("_binary_uplot_min_css_end");
 
 /* ── Static file table ────────────────────────────────────────── */
 
@@ -62,10 +66,12 @@ typedef struct {
  * so it lives in flash alongside the file data.
  */
 static const embedded_file_t s_files[] = {
-    {"/",           "text/html",              index_html_start, index_html_end},
-    {"/index.html", "text/html",              index_html_start, index_html_end},
-    {"/style.css",  "text/css",               style_css_start,  style_css_end},
-    {"/app.js",     "application/javascript", app_js_start,     app_js_end},
+    {"/",             "text/html",              index_html_start, index_html_end},
+    {"/index.html",   "text/html",              index_html_start, index_html_end},
+    {"/style.css",    "text/css",               style_css_start,  style_css_end},
+    {"/app.js",       "application/javascript", app_js_start,     app_js_end},
+    {"/uplot.min.js", "application/javascript", uplot_js_start,   uplot_js_end},
+    {"/uplot.min.css","text/css",               uplot_css_start,  uplot_css_end},
 };
 
 /* ── Handlers ─────────────────────────────────────────────────── */
@@ -73,7 +79,7 @@ static const embedded_file_t s_files[] = {
 /**
  * @brief Serve an embedded static file matched by request URI.
  *
- * Iterates s_files[] linearly (4 entries — negligible cost). Returns 404
+ * Iterates s_files[] linearly (6 entries — negligible cost). Returns 404
  * if the URI is not in the table.
  */
 static esp_err_t static_handler(httpd_req_t *req)

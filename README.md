@@ -56,7 +56,8 @@ an embedded `.env` file — no recompile needed for Wi-Fi or port changes.
     ├── web/
     │   ├── index.html     # Sidebar + tabbed dashboard
     │   ├── style.css      # Dark theme, responsive sidebar
-    │   └── app.js         # Tab switching, status polling
+    │   ├── app.js         # Tab switching, status polling, uPlot chart
+    │   └── uplot.min.js/.css  # Vendored uPlot 1.6.32 (51 KB, MIT)
     └── utils/
         ├── dotenv.h / .c  # Embedded .env parser
         ├── wifi_connect.h/c # Wi-Fi STA lifecycle

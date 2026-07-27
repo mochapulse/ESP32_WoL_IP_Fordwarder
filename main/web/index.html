@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>ESP32 WoL Forwarder</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/uplot.min.css">
 </head>
 <body>
   <div class="layout">
@@ -79,6 +80,11 @@
               <span id="uptime" class="value">--</span>
             </div>
           </div>
+        </div>
+
+        <div class="card">
+          <h3>Memory History</h3>
+          <div id="heap-chart" class="chart-container"></div>
         </div>
 
         <div class="card">
@@ -206,6 +212,7 @@
     </button>
   </nav>
 
+  <script src="/uplot.min.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

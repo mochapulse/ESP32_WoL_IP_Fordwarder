@@ -35,6 +35,151 @@ function showError(show) {
   if (el) el.className = show ? "error-banner" : "error-banner hidden";
 }
 
+/* ── Memory history chart (uPlot) ─────────────────────────────── */
+
+var MAX_POINTS = 360; // 30 min at 5 s poll interval
+var STORAGE_KEY = "heapHistory.v1";
+var MAX_AGE_S = 30 * 60;   // drop restored points older than this
+var MAX_GAP_S = 15;        // >3 missed polls = line break (null gap)
+
+var chart = null;
+var history = { ts: [], free: [], min: [] };
+
+function pushSample(heapFree, heapMinFree) {
+  history.ts.push(Date.now() / 1000);
+  history.free.push(heapFree);
+  history.min.push(heapMinFree);
+  if (history.ts.length > MAX_POINTS) {
+    history.ts.shift();
+    history.free.shift();
+    history.min.shift();
+  }
+}
+
+function saveHistory() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+  } catch (e) { /* storage full/blocked — history just won't persist */ }
+}
+
+function loadHistory() {
+  var raw;
+  try {
+    raw = localStorage.getItem(STORAGE_KEY);
+  } catch (e) { return; }
+  if (!raw) return;
+
+  var saved;
+  try {
+    saved = JSON.parse(raw);
+  } catch (e) { return; }
+  if (!saved || !Array.isArray(saved.ts) || !Array.isArray(saved.free) ||
+      !Array.isArray(saved.min)) return;
+
+  var cutoff = Date.now() / 1000 - MAX_AGE_S;
+  for (var i = 0; i < saved.ts.length; i++) {
+    var t = saved.ts[i];
+    if (typeof t !== "number" || t < cutoff) continue;
+    // Break the line where the device was unreachable (gap in capture)
+    if (history.ts.length && t - history.ts[history.ts.length - 1] > MAX_GAP_S) {
+      history.ts.push(t - 1);
+      history.free.push(null);
+      history.min.push(null);
+    }
+    history.ts.push(t);
+    history.free.push(saved.free[i]);
+    history.min.push(saved.min[i]);
+    if (history.ts.length > MAX_POINTS) {
+      history.ts.shift();
+      history.free.shift();
+      history.min.shift();
+    }
+  }
+}
+
+function initChart() {
+  if (typeof uPlot === "undefined") return; // lib failed to load — skip
+  var container = document.getElementById("heap-chart");
+  if (!container) return;
+
+  var axisStyle = {
+    stroke: "#64748b",
+    grid:   { stroke: "#334155", width: 1 },
+    ticks:  { stroke: "#334155", width: 1 }
+  };
+
+  var opts = {
+    width:  container.clientWidth,
+    height: 220,
+    legend: { show: true, live: true },
+    cursor: { show: true },
+    scales: {
+      x: {
+        time: true,
+        // no-data pattern from uPlot demos/no-data.html: supply default
+        // ranges while history is empty (dataMin == null before setData)
+        range: function(u, dataMin, dataMax) {
+          if (dataMin == null) {
+            var now = Date.now() / 1000;
+            return [now - 300, now];
+          }
+          if (dataMin === dataMax) return [dataMin - 150, dataMax + 150];
+          return [dataMin, dataMax];
+        }
+      },
+      y: {
+        range: function(u, dataMin, dataMax) {
+          if (dataMin == null) return [0, 360 * 1024];
+          return uPlot.rangeNum(dataMin, dataMax, 0.1, true);
+        }
+      }
+    },
+    axes: [
+      axisStyle,
+      Object.assign({}, axisStyle, {
+        values: function(self, splits) {
+          return splits.map(function(v) { return fmtBytes(v); });
+        }
+      })
+    ],
+    series: [
+      {},
+      {
+        label: "Heap Free",
+        stroke: "#38bdf8",
+        width: 2,
+        points: { show: false }
+      },
+      {
+        label: "Heap Min Free",
+        stroke: "#34d399",
+        width: 1,
+        dash: [6, 4],
+        points: { show: false }
+      }
+    ]
+  };
+
+  // Init with null data — [[],[],[]] crashes uPlot's constructor.
+  chart = new uPlot(opts, null, container);
+
+  window.addEventListener("resize", function() {
+    chart.setSize({ width: container.clientWidth, height: 220 });
+  });
+}
+
+function updateChart(data) {
+  if (!chart || data.heap_free == null) return;
+  // Isolated from refreshStatus()'s try/catch — a chart error must never
+  // surface as "Failed to reach device" (that banner means fetch failed).
+  try {
+    pushSample(data.heap_free, data.heap_min_free);
+    chart.setData([history.ts, history.free, history.min]);
+  } catch (e) {
+    console.error("chart update failed:", e);
+  }
+}
+
 async function refreshStatus() {
   try {
     var res = await fetch("/api/status");
@@ -70,6 +215,8 @@ async function refreshStatus() {
 
     var ipEl = document.getElementById("sidebar-ip");
     if (ipEl && data.ip) ipEl.textContent = data.ip;
+
+    updateChart(data);
   } catch {
     showError(true);
   }
@@ -95,6 +242,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
+  initChart();
   refreshStatus();
   setInterval(refreshStatus, 5000);
 });

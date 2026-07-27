@@ -22,6 +22,8 @@ idf_component_register(
     EMBED_FILES "web/index.html"
                 "web/style.css"
                 "web/app.js"
+                "web/uplot.min.js"
+                "web/uplot.min.css"
     REQUIRES  nvs_flash
               esp_wifi
               esp_netif
