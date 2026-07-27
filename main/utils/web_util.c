@@ -1,3 +1,15 @@
+/**
+ * @file    web_util.c
+ * @brief   HTTP server lifecycle — implementation.
+ *
+ * Manages a single httpd_handle_t. Opens on web_start(), delegates endpoint
+ * registration to web_API_init(), and closes on web_stop().
+ *
+ * @note    Wildcard URI matching (httpd_uri_match_wildcard) is enabled so
+ *          that '/' '*' patterns work. The default httpd config uses strncmp
+ *          which treats `*` as a literal character.
+ */
+
 #include "web_util.h"
 
 #include "esp_err.h"
@@ -7,8 +19,10 @@
 
 static const char *TAG = "web_util";
 
-static httpd_handle_t s_server = NULL;
-static uint16_t s_port = 80;
+static httpd_handle_t s_server = NULL;   /**< Active server handle */
+static uint16_t       s_port   = 80;     /**< TCP port (default 80) */
+
+/* ── Public API ───────────────────────────────────────────────── */
 
 esp_err_t web_init(uint16_t port)
 {
@@ -25,8 +39,8 @@ esp_err_t web_start(void)
     }
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.server_port = s_port;
-    config.uri_match_fn = httpd_uri_match_wildcard;
+    config.server_port    = s_port;
+    config.uri_match_fn   = httpd_uri_match_wildcard;
 
     esp_err_t ret = httpd_start(&s_server, &config);
     if (ret != ESP_OK) {
