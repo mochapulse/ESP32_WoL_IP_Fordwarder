@@ -28,7 +28,8 @@ esp_err_t web_init(uint16_t port);
  *
  * If the server is already running this is a no-op.
  * Enables URI wildcard matching (httpd_uri_match_wildcard) so that '/' '*'
- * catch-all patterns work.
+ * catch-all patterns work. Applies fixed resource caps to reduce exposure to
+ * socket starvation and oversized-request memory pressure.
  *
  * @return  ESP_OK on success, or an esp_err_t from httpd_start().
  */

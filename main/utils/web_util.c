@@ -22,6 +22,14 @@ static const char *TAG = "web_util";
 static httpd_handle_t s_server = NULL;   /**< Active server handle */
 static uint16_t       s_port   = 80;     /**< TCP port (default 80) */
 
+/* ── Security resource caps (public-exposure hardening) ─────── */
+
+#define WEB_MAX_OPEN_SOCKETS   3    /**< Bound concurrent sockets to limit RAM pressure */
+#define WEB_MAX_URI_LEN        256  /**< Reject oversized URI paths */
+#define WEB_MAX_REQ_HDR_LEN    512  /**< Reject oversized request headers */
+#define WEB_RECV_TIMEOUT_SEC   5    /**< Slow-client receive timeout */
+#define WEB_SEND_TIMEOUT_SEC   5    /**< Stalled-send timeout */
+
 /* ── Public API ───────────────────────────────────────────────── */
 
 esp_err_t web_init(uint16_t port)
@@ -41,6 +49,12 @@ esp_err_t web_start(void)
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port    = s_port;
     config.uri_match_fn   = httpd_uri_match_wildcard;
+    config.max_open_sockets = WEB_MAX_OPEN_SOCKETS;
+    config.lru_purge_enable = true;
+    config.max_uri_len      = WEB_MAX_URI_LEN;
+    config.max_req_hdr_len  = WEB_MAX_REQ_HDR_LEN;
+    config.recv_wait_timeout = WEB_RECV_TIMEOUT_SEC;
+    config.send_wait_timeout = WEB_SEND_TIMEOUT_SEC;
 
     esp_err_t ret = httpd_start(&s_server, &config);
     if (ret != ESP_OK) {
