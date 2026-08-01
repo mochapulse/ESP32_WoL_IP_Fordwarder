@@ -33,6 +33,7 @@ idf_component_register(
               esp_timer
               esp_app_format
               cjson
+              lwip
 )
 
 # ── Embed .env (dotfile — not picked up by EMBED_FILES) ─────────────────────

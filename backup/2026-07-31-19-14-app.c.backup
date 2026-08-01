@@ -20,8 +20,6 @@
 #include "freertos/task.h"
 #include "web_util.h"
 #include "wifi_connect.h"
-#include "lwip/inet.h"
-#include "lwip/sockets.h"
 
 static const char *TAG = "APP";
 
@@ -50,9 +48,6 @@ void app_main(void)
     const char *app_name = dotenv_get("APP_NAME");
     if (!app_name) app_name = "ESP32_WoL";
     ESP_LOGI(TAG, "%s starting", app_name);
-
-    const char *wol_mac = dotenv_get("SERVER_WOL_MAC");
-    const char *bcast_ip = dotenv_get("BROADCAST_WOL_IP");
 
     const char *ssid   = dotenv_get("SSID_WIFI");
     const char *passwd = dotenv_get("PASSWD_WIFI");
