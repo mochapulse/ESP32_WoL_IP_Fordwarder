@@ -320,9 +320,41 @@ body {
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
-  color: var(--text-muted);
+  color: var(--text-primary);
   font-family: "SF Mono", "Cascadia Code", monospace;
+  cursor: text;
+}
+
+.form-group input:disabled {
+  color: var(--text-muted);
   cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.token-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.btn-action {
+  background: var(--bg-root);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.btn-action:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-action.danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .hint {

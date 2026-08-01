@@ -44,6 +44,52 @@ var MAX_GAP_S = 15;        // >3 missed polls = line break (null gap)
 
 var chart = null;
 var history = { ts: [], free: [], min: [] };
+var API_TOKEN_KEY = "webApiToken.v1";
+var apiToken = "";
+var tokenInput = null;
+var tokenToggleBtn = null;
+var tokenChangeBtn = null;
+var tokenForgetBtn = null;
+var isTokenEditing = false;
+
+function loadApiToken() {
+  try {
+    var saved = localStorage.getItem(API_TOKEN_KEY);
+    apiToken = saved || "";
+  } catch (e) {
+    apiToken = "";
+  }
+}
+
+function persistApiToken(value) {
+  apiToken = value || "";
+  try {
+    if (apiToken) localStorage.setItem(API_TOKEN_KEY, apiToken);
+    else localStorage.removeItem(API_TOKEN_KEY);
+  } catch (e) { /* storage unavailable */ }
+}
+
+function authHeaders() {
+  if (!apiToken) return {};
+  return { "X-API-Key": apiToken };
+}
+
+function setTokenInputMode(editing) {
+  if (!tokenInput || !tokenChangeBtn) return;
+  isTokenEditing = !!editing;
+  tokenInput.disabled = !isTokenEditing;
+  tokenChangeBtn.textContent = isTokenEditing ? "Save token" : "Change token";
+  if (isTokenEditing) {
+    tokenInput.focus();
+    tokenInput.select();
+  }
+}
+
+function setTokenVisibility(show) {
+  if (!tokenInput || !tokenToggleBtn) return;
+  tokenInput.type = show ? "text" : "password";
+  tokenToggleBtn.textContent = show ? "Hide key" : "Show key";
+}
 
 function pushSample(heapFree, heapMinFree) {
   history.ts.push(Date.now() / 1000);
@@ -182,7 +228,7 @@ function updateChart(data) {
 
 async function refreshStatus() {
   try {
-    var res = await fetch("/api/status");
+    var res = await fetch("/api/status", { headers: authHeaders() });
     if (!res.ok) throw new Error("Not available");
     var data = await res.json();
 
@@ -236,6 +282,55 @@ function switchTab(tabName) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+  loadApiToken();
+
+  tokenInput = document.getElementById("api-token");
+  tokenToggleBtn = document.getElementById("toggle-api-token");
+  tokenChangeBtn = document.getElementById("change-api-token");
+  tokenForgetBtn = document.getElementById("forget-api-token");
+
+  if (tokenInput) {
+    tokenInput.value = apiToken;
+    tokenInput.addEventListener("keydown", function(evt) {
+      if (evt.key === "Enter" && isTokenEditing) {
+        persistApiToken(this.value.trim());
+        setTokenInputMode(false);
+        refreshStatus();
+      }
+    });
+    setTokenInputMode(!apiToken);
+  }
+
+  if (tokenToggleBtn) {
+    tokenToggleBtn.addEventListener("click", function() {
+      setTokenVisibility(tokenInput && tokenInput.type === "password");
+    });
+  }
+  setTokenVisibility(false);
+
+  if (tokenChangeBtn) {
+    tokenChangeBtn.addEventListener("click", function() {
+      if (!tokenInput) return;
+      if (!isTokenEditing) {
+        setTokenInputMode(true);
+        return;
+      }
+      persistApiToken(tokenInput.value.trim());
+      setTokenInputMode(false);
+      refreshStatus();
+    });
+  }
+
+  if (tokenForgetBtn) {
+    tokenForgetBtn.addEventListener("click", function() {
+      persistApiToken("");
+      if (tokenInput) tokenInput.value = "";
+      setTokenInputMode(true);
+      setTokenVisibility(false);
+      showError(true);
+    });
+  }
+
   document.querySelectorAll(".menu-item, .bottombar-item").forEach(function(el) {
     el.addEventListener("click", function() {
       switchTab(this.dataset.tab);

@@ -32,6 +32,18 @@
     <main class="content">
       <section id="tab-status" class="tab active">
         <h2>Device Status</h2>
+        <div class="card">
+          <h3>API Authentication</h3>
+          <div class="form-group">
+            <label for="api-token">X-API-Key Token</label>
+            <input id="api-token" type="password" autocomplete="off" placeholder="Enter WEB_API_TOKEN">
+          </div>
+          <div class="token-actions">
+            <button id="toggle-api-token" class="btn-action" type="button">Show key</button>
+            <button id="change-api-token" class="btn-action" type="button">Change token</button>
+            <button id="forget-api-token" class="btn-action danger" type="button">Forget token</button>
+          </div>
+        </div>
         <div id="status-error" class="error-banner hidden">Failed to reach device</div>
 
         <div class="card">
