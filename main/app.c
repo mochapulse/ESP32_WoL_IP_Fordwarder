@@ -15,11 +15,13 @@
  */
 
 #include "dotenv.h"
+#include "esp_err.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "web_util.h"
 #include "wifi_connect.h"
+#include "wol.h"
 #include "lwip/inet.h"
 #include "lwip/sockets.h"
 
@@ -62,6 +64,12 @@ void app_main(void)
     }
 
     uint16_t web_port = (uint16_t)dotenv_get_int("WEB_PORT", 80);
+
+    esp_err_t wol_ret = wol_init(wol_mac, bcast_ip);
+    if (wol_ret != ESP_OK) {
+        ESP_LOGW(TAG, "WoL disabled due to invalid config: %s",
+                 esp_err_to_name(wol_ret));
+    }
 
     /* ── Wi-Fi ───────────────────────────────────────────────── */
     ESP_ERROR_CHECK(wifi_init(ssid, passwd));

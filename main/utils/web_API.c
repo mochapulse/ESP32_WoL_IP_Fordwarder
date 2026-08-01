@@ -33,6 +33,7 @@
 #include "esp_timer.h"
 #include "freertos/task.h"
 #include "wifi_connect.h"
+#include "wol.h"
 
 static const char *TAG = "web_API";
 
@@ -196,6 +197,25 @@ static esp_err_t status_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+/**
+ * @brief Trigger a WoL send and return JSON status.
+ */
+static esp_err_t wol_handler(httpd_req_t *req)
+{
+    esp_err_t ret = wol_send();
+    httpd_resp_set_type(req, "application/json");
+
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "wol_send failed: %s", esp_err_to_name(ret));
+        httpd_resp_set_status(req, "500 Internal Server Error");
+        httpd_resp_sendstr(req, "{\"ok\":false}");
+        return ESP_FAIL;
+    }
+
+    httpd_resp_sendstr(req, "{\"ok\":true}");
+    return ESP_OK;
+}
+
 /* ── Registration ─────────────────────────────────────────────── */
 
 /**
@@ -203,8 +223,9 @@ static esp_err_t status_handler(httpd_req_t *req)
  *
  * Order is significant with wildcard matching:
  *   1. /api/status  — exact JSON endpoint.
- *   2. /            — exact root → index.html.
- *   3. \/\*         — wildcard catch-all → static file table.
+ *   2. /api/wol     — exact endpoint to send WoL packet.
+ *   3. /            — exact root → index.html.
+ *   4. \/\*         — wildcard catch-all → static file table.
  *
  * If '\/\*' were registered before `/api/status`, the wildcard would
  * intercept it because '\/\*' matches anything starting with `/`.
@@ -217,6 +238,20 @@ void web_API_init(httpd_handle_t server)
         .handler = status_handler,
     };
     httpd_register_uri_handler(server, &status_uri);
+
+    httpd_uri_t wol_uri = {
+        .uri     = "/api/wol",
+        .method  = HTTP_POST,
+        .handler = wol_handler,
+    };
+    httpd_register_uri_handler(server, &wol_uri);
+
+    httpd_uri_t wol_get_uri = {
+        .uri     = "/api/wol",
+        .method  = HTTP_GET,
+        .handler = wol_handler,
+    };
+    httpd_register_uri_handler(server, &wol_get_uri);
 
     httpd_uri_t root_uri = {
         .uri     = "/",

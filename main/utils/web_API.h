@@ -1,9 +1,10 @@
 /**
  * @file    web_API.h
- * @brief   HTTP endpoint registration — static files and /api/status JSON.
+ * @brief   HTTP endpoint registration — static files, /api/status, /api/wol.
  *
  * Registers:
  *  - `/api/status`  → JSON payload with full ESP32 metadata.
+ *  - `/api/wol`     → trigger Wake-on-LAN magic packet send.
  *  - `/`            → serves index.html (embedded in flash).
  *  - `\/\*`         → wildcard catch-all for /style.css, /app.js, etc.
  *

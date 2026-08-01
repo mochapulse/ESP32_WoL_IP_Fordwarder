@@ -15,6 +15,7 @@ idf_component_register(
     SRCS       "app.c"
                "utils/dotenv.c"
                "utils/wifi_connect.c"
+               "utils/wol.c"
                "utils/web_util.c"
                "utils/web_API.c"
     INCLUDE_DIRS "."
