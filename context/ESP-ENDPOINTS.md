@@ -15,6 +15,25 @@ You can see the current LAN IP in serial logs (`Web server: http://...`) or by o
 
 ---
 
+## API Authentication
+
+All `/api/*` routes require header-based authentication.
+
+- Header: `X-API-Key: <WEB_API_TOKEN>`
+- Token source: `WEB_API_TOKEN` in `main/.env`
+
+Missing or invalid token returns:
+
+- HTTP status: `401 Unauthorized`
+- Body: `Unauthorized`
+
+If `WEB_API_TOKEN` is missing/invalid in firmware config:
+
+- HTTP status: `500 Internal Server Error`
+- Body: `API auth is not configured` or `API auth config is invalid`
+
+---
+
 ## 1) `GET /api/status`
 
 Returns device/network/runtime info as JSON.
@@ -22,7 +41,9 @@ Returns device/network/runtime info as JSON.
 ### Example
 
 ```bash
-curl -s http://<ESP32_LAN_IP>:<WEB_PORT>/api/status
+curl -s \
+  -H "X-API-Key: <WEB_API_TOKEN>" \
+  http://<ESP32_LAN_IP>:<WEB_PORT>/api/status
 ```
 
 ### Response (shape)
@@ -54,6 +75,9 @@ curl -s http://<ESP32_LAN_IP>:<WEB_PORT>/api/status
 Notes:
 - `ip` can be empty when Wi-Fi is not connected yet.
 - Some fields (for example `flash_size`, `mac`) appear only when underlying calls succeed.
+- If free heap is below the safety threshold, request is rejected with:
+  - HTTP status: `503 Service Unavailable`
+  - Body: `Low memory threshold reached`
 
 ---
 
@@ -65,8 +89,13 @@ Both methods trigger the same Wake-on-LAN send operation.
 ### Examples
 
 ```bash
-curl -X POST http://<ESP32_LAN_IP>:<WEB_PORT>/api/wol
-curl http://<ESP32_LAN_IP>:<WEB_PORT>/api/wol
+curl -X POST \
+  -H "X-API-Key: <WEB_API_TOKEN>" \
+  http://<ESP32_LAN_IP>:<WEB_PORT>/api/wol
+
+curl \
+  -H "X-API-Key: <WEB_API_TOKEN>" \
+  http://<ESP32_LAN_IP>:<WEB_PORT>/api/wol
 ```
 
 ### Success response
@@ -88,6 +117,7 @@ Typical failure reason:
 - WoL is not initialized because `.env` values are missing/invalid:
   - `SERVER_WOL_MAC` must be `XX:XX:XX:XX:XX:XX`
   - `BROADCAST_WOL_IP` must be a valid IPv4 address (for example `192.168.1.255`)
+- Request is rejected when free heap is under the safety threshold (`503`).
 
 ---
 

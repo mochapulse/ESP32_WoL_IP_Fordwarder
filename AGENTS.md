@@ -67,6 +67,14 @@ doxygen Doxyfile
 - CI builds and deploys docs on push to `main` via `.github/workflows/docs.yml`.
 - Full guide: [doc/README.md](doc/README.md)
 
+## API auth + endpoint behavior
+
+- API routes (`/api/status`, `/api/wol`) require header auth:
+  `X-API-Key: <WEB_API_TOKEN>`.
+- Configure `WEB_API_TOKEN` in `main/.env` (see `main/.env.example`).
+- API routes can return `503 Service Unavailable` with body
+  `Low memory threshold reached` when free heap is below the safety guard.
+
 ## Project path
 
 ```

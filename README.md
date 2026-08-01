@@ -81,6 +81,7 @@ Edit `main/.env`:
 | `PASSWD_WIFI` | yes | — | Wi-Fi password |
 | `APP_NAME` | no | `ESP32_WoL` | Logged at boot |
 | `WEB_PORT` | no | `80` | HTTP port |
+| `WEB_API_TOKEN` | yes | — | API key required on all `/api/*` routes (`X-API-Key`) |
 
 ### Build & flash
 
@@ -122,9 +123,20 @@ All inputs are currently disabled — backend not implemented.
 | `GET` | `/index.html` | Dashboard HTML |
 | `GET` | `/style.css` | Stylesheet |
 | `GET` | `/app.js` | Client JavaScript |
+| `POST` | `/api/wol` | Trigger WoL packet, returns `{"ok":true}` or `{"ok":false}` |
+| `GET` | `/api/wol` | Same behavior as POST |
 | `GET` | `/api/status` | JSON with full device metadata |
 
 Static assets are embedded in flash — no filesystem or SD card.
+
+All `/api/*` endpoints require:
+
+```http
+X-API-Key: <WEB_API_TOKEN>
+```
+
+Missing/invalid key returns `401 Unauthorized`. If free heap is below the
+safety threshold, API routes return `503 Service Unavailable`.
 
 ### `/api/status` response
 
