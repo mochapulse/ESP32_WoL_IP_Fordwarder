@@ -34,6 +34,7 @@ idf_component_register(
               esp_timer
               esp_app_format
               cjson
+              mbedtls
               lwip
 )
 
