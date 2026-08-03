@@ -5,8 +5,11 @@
 ## What it does
 
 - Connects to a WPA2-PSK Wi-Fi network with credentials from an embedded `.env`
-- Serves a responsive web dashboard with **real-time device status** (chip info, memory, firmware) and a **WoL configuration panel** (placeholder)
-- Exposes a JSON REST API at `/api/status`
+- Serves a responsive web dashboard with **real-time device status** (chip info, memory, firmware) and uPlot charting
+- Exposes a JSON REST API at `/api/status` and `/api/wol`
+- Sends Wake-on-LAN magic packets via UDP broadcast
+- API key authentication (`X-API-Key` header) on all `/api/*` routes
+- Returns `503 Service Unavailable` when free heap drops below the safety guard
 - Retries Wi-Fi automatically on disconnect
 
 ## API reference
@@ -15,8 +18,9 @@
 |----------|--------|-------------|
 | `/` | `GET` | Dashboard HTML (sidebar + tabbed layout) |
 | `/style.css` | `GET` | Dark-theme responsive stylesheet |
-| `/app.js` | `GET` | Client-side tab switching + status polling |
+| `/app.js` | `GET` | Client-side tab switching + status polling + uPlot chart |
 | `/api/status` | `GET` | JSON: Wi-Fi state, IP, MAC, heap, chip info, firmware |
+| `/api/wol` | `GET` \| `POST` | Trigger WoL magic packet, returns `{"ok":true/false}` |
 
 > All static assets are embedded in flash via `EMBED_FILES` — no SPIFFS or SD card.
 
@@ -28,7 +32,8 @@ utils/
   dotenv       — embedded .env parser (16 keys, objcopy blob)
   wifi_connect — Wi-Fi STA lifecycle (event group, retry guard)
   web_util     — HTTP server start/stop/health
-  web_API      — endpoint registration + embedded file serving + JSON status
+  web_API      — endpoint registration, embedded file serving, JSON status + WoL
+  wol          — Wake-on-LAN destination config + magic packet sender via UDP
 ```
 
 ## Build & flash
