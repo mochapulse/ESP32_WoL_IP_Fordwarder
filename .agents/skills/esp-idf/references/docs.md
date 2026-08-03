@@ -55,6 +55,8 @@
 - **POSIX Threads**: https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32/api-reference/system/pthread.html
 - **Provisioning**: https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32/api-reference/provisioning/provisioning.html
 - **Kconfig Reference**: https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32/api-reference/kconfig-reference.html
+- **Unit Testing**: https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32/api-guides/unit-tests.html
+- **ESP-IDF Tests with Pytest**: https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32/contribute/esp-idf-tests-with-pytest.html
 
 ## Alias (from ~/.zshrc)
 
