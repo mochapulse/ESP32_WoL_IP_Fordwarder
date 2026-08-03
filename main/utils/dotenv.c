@@ -28,6 +28,8 @@ static const char *TAG = "dotenv";
 extern const unsigned char _binary__env_start[] asm("_binary__env_start");
 extern const unsigned char _binary__env_end[]   asm("_binary__env_end");
 
+/** @test{dotenv_parse_line} Fed directly by test_dotenv.c. */
+
 /* ── Limits ──────────────────────────────────────────────────── */
 
 #define DOTENV_MAX_KEYS  16    /**< Maximum storable key/value pairs */
@@ -56,7 +58,7 @@ static int            s_entry_count;              /**< Number of valid entries *
  * @param line  Pointer to first non-whitespace character.
  * @param len   Number of bytes until end-of-line (excluding the terminator).
  */
-static void parse_line(const char *line, size_t len)
+void dotenv_parse_line(const char *line, size_t len)
 {
     const char *eq = memchr(line, '=', len);
     if (!eq) return;
@@ -110,7 +112,7 @@ void dotenv_init(void)
             while (ls < p && (*ls == ' ' || *ls == '\t')) ls++;
             size_t len = (size_t)(p - ls);
             if (len > 0 && *ls != '#') {
-                parse_line((const char *)ls, len);
+                dotenv_parse_line((const char *)ls, len);
             }
             line_start = p + 1;
             if (*p == '\0') break;
@@ -123,7 +125,7 @@ void dotenv_init(void)
         while (ls < end && (*ls == ' ' || *ls == '\t')) ls++;
         size_t len = (size_t)(end - ls);
         if (len > 0 && *ls != '#') {
-            parse_line((const char *)ls, len);
+            dotenv_parse_line((const char *)ls, len);
         }
     }
 
@@ -144,4 +146,10 @@ int dotenv_get_int(const char *key, int default_value)
     const char *val = dotenv_get(key);
     if (!val) return default_value;
     return atoi(val);
+}
+
+void dotenv_reset(void)
+{
+    s_entry_count = 0;
+    memset(s_entries, 0, sizeof(s_entries));
 }

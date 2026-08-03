@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,6 +46,22 @@ const char *dotenv_get(const char *key);
  * @return              Parsed integer or `default_value`.
  */
 int dotenv_get_int(const char *key, int default_value);
+
+/**
+ * @brief Parse a single "KEY=VALUE" line and store it in the entry table.
+ *
+ * Handles optional double-quote wrapping, leading/trailing whitespace,
+ * and CRLF endings. Exposed for unit testing.
+ *
+ * @param line  Pointer to first non-whitespace character of the line.
+ * @param len   Number of bytes until end-of-line (excluding terminator).
+ */
+void dotenv_parse_line(const char *line, size_t len);
+
+/**
+ * @brief Reset the internal entry table (for test isolation).
+ */
+void dotenv_reset(void);
 
 #ifdef __cplusplus
 }

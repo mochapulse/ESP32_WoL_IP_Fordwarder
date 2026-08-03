@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "esp_chip_info.h"
 #include "esp_http_server.h"
 
 #ifdef __cplusplus
@@ -30,6 +31,14 @@ extern "C" {
  * @param server  Valid httpd_handle_t from httpd_start().
  */
 void web_API_init(httpd_handle_t server);
+
+/**
+ * @brief Map esp_chip_model_t enum value to a human-readable string.
+ *
+ * @param model  Chip model enum from esp_chip_info().
+ * @return       Static string (e.g. "ESP32", "ESP32-C3", "Unknown").
+ */
+const char *chip_model_str(esp_chip_model_t model);
 
 #ifdef __cplusplus
 }

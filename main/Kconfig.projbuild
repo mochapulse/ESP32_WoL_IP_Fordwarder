@@ -1,0 +1,11 @@
+menu "Unit Tests"
+
+    config RUN_UNIT_TESTS_AT_BOOT
+        bool "Run all unit tests at boot"
+        default y
+        help
+            When enabled, app_main() runs the Unity interactive test
+            menu instead of the normal health-monitoring loop.
+            Disable for production builds.
+
+endmenu

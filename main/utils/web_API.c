@@ -164,7 +164,7 @@ static esp_err_t static_handler(httpd_req_t *req)
 /**
  * @brief Map esp_chip_model_t enum to a human-readable string.
  */
-static const char *chip_model_str(esp_chip_model_t model)
+const char *chip_model_str(esp_chip_model_t model)
 {
     switch (model) {
     case CHIP_ESP32:   return "ESP32";

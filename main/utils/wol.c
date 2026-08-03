@@ -21,14 +21,14 @@ static bool s_is_init = false;
 static uint8_t s_mac[WOL_MAC_BYTES];
 static struct sockaddr_in s_target_addr;
 
-static bool is_hex_char(char c)
+bool is_hex_char(char c)
 {
     return (c >= '0' && c <= '9') ||
            (c >= 'a' && c <= 'f') ||
            (c >= 'A' && c <= 'F');
 }
 
-static bool is_valid_mac_format(const char *mac_str)
+bool is_valid_mac_format(const char *mac_str)
 {
     if (!mac_str || strlen(mac_str) != 17) {
         return false;
@@ -131,4 +131,11 @@ esp_err_t wol_send(void)
     close(sockfd);
     ESP_LOGI(TAG, "Magic packet sent");
     return ESP_OK;
+}
+
+void wol_reset(void)
+{
+    s_is_init = false;
+    memset(s_mac, 0, sizeof(s_mac));
+    memset(&s_target_addr, 0, sizeof(s_target_addr));
 }

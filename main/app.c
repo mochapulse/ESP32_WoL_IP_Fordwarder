@@ -24,6 +24,12 @@
 #include "wol.h"
 #include "lwip/inet.h"
 #include "lwip/sockets.h"
+#if CONFIG_RUN_UNIT_TESTS_AT_BOOT
+#include "unity_test_runner.h"
+extern void test_dotenv_anchor(void);
+extern void test_wol_anchor(void);
+extern void test_web_API_anchor(void);
+#endif
 
 static const char *TAG = "APP";
 
@@ -46,6 +52,15 @@ static const char *TAG = "APP";
  */
 void app_main(void)
 {
+#if CONFIG_RUN_UNIT_TESTS_AT_BOOT
+    test_dotenv_anchor();
+    test_wol_anchor();
+    test_web_API_anchor();
+    ESP_LOGI(TAG, "Test mode — running unit test menu");
+    unity_run_menu();
+    while (1) { vTaskDelay(portMAX_DELAY); }
+#endif
+
     /* ── .env ────────────────────────────────────────────────── */
     dotenv_init();
 

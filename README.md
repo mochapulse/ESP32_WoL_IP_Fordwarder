@@ -62,7 +62,13 @@ an embedded `.env` file — no recompile needed for Wi-Fi or port changes.
         ├── dotenv.h / .c  # Embedded .env parser
         ├── wifi_connect.h/c # Wi-Fi STA lifecycle
         ├── web_util.h / .c  # HTTP server lifecycle
-        └── web_API.h / .c # REST endpoints + cJSON
+        ├── web_API.h / .c # REST endpoints + cJSON
+        └── wol.h / .c       # Wake-on-LAN magic packet
+    └── test/
+        ├── README           # Unit test guide
+        ├── test_dotenv.c    # 7 dotenv parser tests
+        ├── test_wol.c       # 14 WoL validation tests
+        └── test_web_API.c   # 5 chip model mapping tests
 ```
 
 ## Quick start
@@ -163,6 +169,20 @@ safety threshold, API routes return `503 Service Unavailable`.
   "app_time": "18:39:49"
 }
 ```
+
+## Unit tests
+
+26 unit tests run on-device via the ESP-IDF Unity framework. See
+[main/test/README](main/test/README) for the full guide.
+
+```bash
+# Test mode is enabled by default in sdkconfig (CONFIG_RUN_UNIT_TESTS_AT_BOOT=y)
+idf.py build
+idf.py -p /dev/ttyUSB0 flash monitor
+# Press Enter, then type * to run all 26 tests
+```
+
+Tag-based filtering: `"[dotenv]"` (7), `"[wol]"` (14), `"[web_API]"` (5).
 
 ## Dependencies
 

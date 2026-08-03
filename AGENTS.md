@@ -50,6 +50,49 @@ python3 "$IDF_PATH/tools/idf.py" flash -p /dev/ttyUSB0
 python3 "$IDF_PATH/tools/idf.py" -p /dev/ttyUSB0 flash monitor
 ```
 
+## Unit tests
+
+26 tests in `main/test/` (7 dotenv + 14 wol + 5 web_API). Tests run
+on-device via the ESP-IDF Unity test runner.
+
+### Test mode toggle
+
+```bash
+# Enable tests (default)
+python3 "$IDF_PATH/tools/idf.py" menuconfig
+# Unit Tests → Run all unit tests at boot → [*]
+
+# Disable for production
+# Unit Tests → Run all unit tests at boot → [ ]
+```
+
+### Build & flash (test mode)
+
+```bash
+python3 "$IDF_PATH/tools/idf.py" build
+python3 "$IDF_PATH/tools/idf.py" flash -p /dev/ttyUSB0
+```
+
+### Run tests over serial
+
+```bash
+# Interactive (press Enter for menu, then * for all tests)
+python3 "$IDF_PATH/tools/idf.py" monitor -p /dev/ttyUSB0
+
+# Automated — run all 26 tests and parse pass/fail
+python3 -c "
+import serial, time
+ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
+ser.dtr=False; ser.rts=True; time.sleep(0.1); ser.dtr=True; time.sleep(4)
+ser.write(b'*\r'); time.sleep(6)
+out = ser.read(16384)
+ser.close()
+print(out.decode(errors='replace'))
+"
+```
+
+Full guide: [main/test/README](main/test/README).
+
 ## Doxygen docs
 
 API docs are built with `doxygen` + `graphviz` (installed system-wide):

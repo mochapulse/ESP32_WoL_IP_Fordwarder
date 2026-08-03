@@ -1,0 +1,116 @@
+# Unit Tests — lan-controller-esp32
+
+## Overview
+
+26 unit tests across 3 modules, running on-device via the ESP-IDF Unity
+test runner. All tests pass on ESP32 hardware (`/dev/ttyUSB0`).
+
+| Module   | Tag         | Tests | What's tested                               |
+|----------|-------------|-------|---------------------------------------------|
+| `dotenv` | `[dotenv]`  | 7     | Line parsing, quote/whitespace/CR handling, lookups |
+| `wol`    | `[wol]`     | 14    | MAC validation, hex chars, init arg checks, state guard |
+| `web_API`| `[web_API]` | 5     | Chip model enum-to-string mapping            |
+
+## How it works
+
+Tests are compiled into the main component when `CONFIG_RUN_UNIT_TESTS_AT_BOOT=y`
+(Kconfig option in `main/Kconfig.projbuild`). In test mode `app_main()` calls
+`unity_run_menu()` instead of the production health loop.
+
+Dummy anchor functions in each test file (`test_dotenv_anchor()`, etc.) are
+called from `app_main` to force the linker to include the test objects.
+Without this, the static-library linker drops unreferenced `.o` files and
+`TEST_CASE` constructors never fire.
+
+## Quick start
+
+```bash
+# 1. Enable test mode (default is 'y')
+source /home/javastral/.espressif/tools/activate_idf_v6.0.2.sh > /dev/null 2>&1
+python3 "$IDF_PATH/tools/idf.py" menuconfig
+# Navigate: Unit Tests → Run all unit tests at boot → [*]
+
+# 2. Build & flash
+python3 "$IDF_PATH/tools/idf.py" build
+python3 "$IDF_PATH/tools/idf.py" flash -p /dev/ttyUSB0
+
+# 3. Connect serial monitor
+python3 "$IDF_PATH/tools/idf.py" monitor -p /dev/ttyUSB0
+
+# 4. In the monitor, press Enter to see the test menu, then type:
+#    *           → run all 26 tests
+#    "[dotenv]"  → run dotenv tests only
+#    "[wol]"     → run wol tests only
+#    "[web_API]" → run web_API tests only
+#    "test name" → run a single test by name
+```
+
+## Automated test run (no interactive monitor)
+
+```bash
+python3 -c "
+import serial, time
+ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
+ser.dtr=False; ser.rts=True; time.sleep(0.1); ser.dtr=True; time.sleep(4)
+ser.write(b'*\r'); time.sleep(6)
+out = ser.read(16384)
+ser.close()
+print(out.decode(errors='replace'))
+"
+```
+
+## Return to production firmware
+
+```bash
+python3 "$IDF_PATH/tools/idf.py" menuconfig
+# Navigate: Unit Tests → Run all unit tests at boot → [ ]
+python3 "$IDF_PATH/tools/idf.py" build
+python3 "$IDF_PATH/tools/idf.py" flash -p /dev/ttyUSB0
+```
+
+## Refactoring summary
+
+These production functions were de-static'd and exposed for testing:
+
+| Original (static)      | Exposed as               | Header     |
+|------------------------|--------------------------|------------|
+| `parse_line()`         | `dotenv_parse_line()`    | `dotenv.h` |
+| `is_hex_char()`        | `is_hex_char()`          | `wol.h`    |
+| `is_valid_mac_format()`| `is_valid_mac_format()`  | `wol.h`    |
+| `chip_model_str()`     | `chip_model_str()`       | `web_API.h`|
+
+Three reset helpers added for test isolation:
+
+| Function          | What it clears                    |
+|-------------------|----------------------------------|
+| `dotenv_reset()`  | Entry table (s_entries, s_entry_count) |
+| `wol_reset()`     | s_is_init, s_mac, s_target_addr        |
+
+## Known limitations
+
+- `dotenv_parse_line()` expects **pre-stripped leading whitespace** (the caller
+  in `dotenv_init()` handles that). Tests must not include leading whitespace
+  in the line string.
+- `dotenv_parse_line()` does **not** filter `#` comments — that's done by
+  `dotenv_init()` before calling `parse_line`.
+- `wifi_connect` and `web_util` have no unit tests — all functions depend on
+  hardware/RTOS APIs. Tested via integration on-device.
+- `wol_send()` requires a real network socket — not unit-testable on-device
+  without mocking UPD (tested via integration).
+
+## Adding new tests
+
+1. Create `main/test/test_<module>.c`
+2. Include `"unity.h"` and the module header
+3. Add `void test_<module>_anchor(void) {}` at file scope
+4. Write `TEST_CASE("name", "[tag]") { ... }` blocks
+5. Add the source to `main/CMakeLists.txt` in the
+   `if(CONFIG_RUN_UNIT_TESTS_AT_BOOT)` block
+6. Add `extern void test_<module>_anchor(void);` and call it from the test
+   branch in `main/app.c`
+
+## Doxygen
+
+Test files have `@file`, `@brief`, and `@test` blocks and are picked up
+automatically by the Doxyfile (`INPUT = main`, `RECURSIVE = YES`,
+`GENERATE_TESTLIST = YES`). Run `doxygen Doxyfile` to regenerate.

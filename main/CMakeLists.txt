@@ -36,6 +36,7 @@ idf_component_register(
               cjson
               mbedtls
               lwip
+              unity
 )
 
 # ── Embed .env (dotfile — not picked up by EMBED_FILES) ─────────────────────
@@ -55,3 +56,12 @@ add_custom_command(
     COMMENT "Embedding .env -> dotenv.o"
 )
 target_sources(${COMPONENT_LIB} PRIVATE ${dotenv_obj})
+
+# ── Unit test sources ────────────────────────────────────────────
+if(CONFIG_RUN_UNIT_TESTS_AT_BOOT)
+    target_sources(${COMPONENT_LIB} PRIVATE
+        "test/test_dotenv.c"
+        "test/test_wol.c"
+        "test/test_web_API.c"
+    )
+endif()

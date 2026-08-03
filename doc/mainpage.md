@@ -26,15 +26,16 @@
 
 ## Architecture
 
-```
+ ```
 app.c          — entry point, watchdog loop
-utils/
-  dotenv       — embedded .env parser (16 keys, objcopy blob)
-  wifi_connect — Wi-Fi STA lifecycle (event group, retry guard)
-  web_util     — HTTP server start/stop/health
-  web_API      — endpoint registration, embedded file serving, JSON status + WoL
-  wol          — Wake-on-LAN destination config + magic packet sender via UDP
-```
+ utils/
+   dotenv       — embedded .env parser (16 keys, objcopy blob)
+   wifi_connect — Wi-Fi STA lifecycle (event group, retry guard)
+   web_util     — HTTP server start/stop/health
+   web_API      — endpoint registration, embedded file serving, JSON status + WoL
+   wol          — Wake-on-LAN destination config + magic packet sender via UDP
+ test/          — 26 unit tests (dotenv 7, wol 14, web_API 5)
+ ```
 
 ## Build & flash
 
@@ -43,6 +44,17 @@ cp main/.env.example main/.env   # set SSID_WIFI + PASSWD_WIFI
 idf.py set-target esp32
 idf.py build
 idf.py -p /dev/ttyUSB0 flash monitor
+```
+
+## Testing
+
+26 unit tests run on-device via the ESP-IDF Unity framework.
+`CONFIG_RUN_UNIT_TESTS_AT_BOOT=y` switches to test-mode firmware.
+See \ref README "main/test/README" for the full guide.
+
+```bash
+idf.py -p /dev/ttyUSB0 flash monitor
+# Press Enter → type * → all 26 tests pass
 ```
 
 ## Links

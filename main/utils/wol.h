@@ -8,6 +8,8 @@
 
 #include "esp_err.h"
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -40,6 +42,27 @@ esp_err_t wol_init(const char *wol_mac, const char *bcast_ip);
  *  - ESP_FAIL on socket/send failures.
  */
 esp_err_t wol_send(void);
+
+/**
+ * @brief Check whether a character is a valid hex digit (0-9, a-f, A-F).
+ *
+ * @param c  Character to test.
+ * @return   true if c is a hexadecimal digit.
+ */
+bool is_hex_char(char c);
+
+/**
+ * @brief Validate MAC address string format (XX:XX:XX:XX:XX:XX).
+ *
+ * @param mac_str  Null-terminated MAC address string.
+ * @return         true if the format is valid.
+ */
+bool is_valid_mac_format(const char *mac_str);
+
+/**
+ * @brief Reset WoL module state (for test isolation).
+ */
+void wol_reset(void);
 
 #ifdef __cplusplus
 }
