@@ -9,7 +9,7 @@ changes before pushing.
 ## Live docs
 
 ```
-https://mochapulse.github.io/ESP32_WoL_IP_Fordwarder/
+https://mochapulse.github.io/lan-controller-esp32/
 ```
 
 ## Quick start

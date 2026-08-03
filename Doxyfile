@@ -1,9 +1,9 @@
-# Doxyfile for ESP32_WoL_IP_Fordwarder
+# Doxyfile for lan-controller-esp32
 # Runs on GitHub Actions (Ubuntu runner: doxygen + graphviz via apt).
 # Local: just run `doxygen` in the repo root.
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "ESP32 WoL IP Forwarder"
+PROJECT_NAME           = "ESP32 WoL LAN Controller"
 PROJECT_BRIEF          = "Embedded firmware for ESP32 — Wi-Fi station, HTTP dashboard, Wake-on-LAN"
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = doc/doxygen

@@ -3,4 +3,4 @@
 cmake_minimum_required(VERSION 3.22)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(ESP32_WoL_IP_Fordwarder)
+project(lan-controller-esp32)

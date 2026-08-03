@@ -1,4 +1,4 @@
-# Agent Setup — ESP32_WoL_IP_Fordwarder
+# Agent Setup — lan-controller-esp32
 
 ## idf.py availability
 
@@ -78,5 +78,5 @@ doxygen Doxyfile
 ## Project path
 
 ```
-/home/javastral/GIT/Mocha/ESP32_WoL_IP_Fordwarder
+/home/javastral/GIT/Mocha/lan-controller-esp32
 ```

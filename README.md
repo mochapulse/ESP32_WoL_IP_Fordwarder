@@ -1,4 +1,4 @@
-# ESP32_WoL_IP_Fordwarder
+# lan-controller-esp32
 
 ESP32 firmware built with **ESP-IDF v6.0.2**. Connects to Wi-Fi, serves an
 embedded web dashboard with real-time device status and Wake-on-LAN
@@ -12,7 +12,7 @@ an embedded `.env` file — no recompile needed for Wi-Fi or port changes.
 ```
  ┌──────────┬─────────────────────────────────────────┐
  │ ESP32 WoL│ Device Status                            │
- │ IP Fwd   │                                          │
+ │ LAN Ctrl │                                          │
  │          │ ┌─ Network ────────────────────────────┐ │
  │ ■ Status │ │ Wi-Fi    Connected      LAN IP  .1.9 │ │
  │ ★ WoL Cfg│ │ MAC     3C:8A:1F:A3:D2:74            │ │
@@ -23,7 +23,7 @@ an embedded `.env` file — no recompile needed for Wi-Fi or port changes.
  │          │ │ Tasks   14          Uptime    2m 34s  │ │
  │          │ └──────────────────────────────────────┘ │
  │          │ ┌─ Device ─┐ ┌─ Firmware ─────────────┐ │
- │  .1.9    │ │ ESP32    │ │ ESP32_WoL_IP_Fordwarder │ │
+ │  .1.9    │ │ ESP32    │ │ lan-controller-esp32 │ │
  │          │ │ 2 cores  │ │ 55a178f-dirty           │ │
  └──────────┴─────────────────────────────────────────┘
 ```
@@ -157,7 +157,7 @@ safety threshold, API routes return `503 Service Unavailable`.
   "cpu_freq": 160000000,
   "flash_size": 4194304,
   "chip_features": ["Embedded Flash","Wi-Fi b/g/n","BT","BLE"],
-  "app_name": "ESP32_WoL_IP_Fordwarder",
+  "app_name": "lan-controller-esp32",
   "app_version": "55a178f-dirty",
   "app_date": "Jul 26 2026",
   "app_time": "18:39:49"

@@ -1,4 +1,4 @@
-# ESP32 WoL IP Forwarder    {#mainpage}
+# ESP32 WoL LAN Controller    {#mainpage}
 
 **Embedded firmware for ESP32** — Wi-Fi station, HTTP dashboard, Wake-on-LAN.
 
@@ -42,7 +42,7 @@ idf.py -p /dev/ttyUSB0 flash monitor
 
 ## Links
 
-- [GitHub repository](https://github.com/mochapulse/ESP32_WoL_IP_Fordwarder)
+- [GitHub repository](https://github.com/mochapulse/lan-controller-esp32)
 - [ESP-IDF v6.0.2 docs](https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32/)
 
 ---
