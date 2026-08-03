@@ -118,6 +118,50 @@ doxygen Doxyfile
 - API routes can return `503 Service Unavailable` with body
   `Low memory threshold reached` when free heap is below the safety guard.
 
+## Web frontend
+
+Web assets under `main/web/` are embedded in flash via `EMBED_FILES` in
+`main/CMakeLists.txt` and served through the static file table in
+`main/utils/web_API.c` (`s_files[]`).
+
+### File structure
+
+```
+main/web/
+├── index.html         (imports css/ + js/ + uplot)
+├── uplot.min.js       (v1.6.32, ~51 KB)
+├── uplot.min.css      (~2 KB)
+├── css/
+│   ├── layout.css     (reset, variables, sidebar, bottombar, all breakpoints)
+│   └── components.css (cards, forms, chart grid, error, placeholders, uPlot overrides)
+└── js/
+    ├── formatters.js  (fmtBytes, fmtUptime, fmtFreq, fmtRssi)
+    ├── metrics.js     (METRICS registry, CHARTS, MAX_POINTS, STORAGE_KEY)
+    ├── store.js       (ring buffer, pushSample, loadHistory, saveHistory — 30s debounced)
+    ├── charts.js      (makeChartOpts, initCharts, updateCharts — 4-chart 2×2 grid)
+    └── dashboard.js   (token auth, refreshStatus, switchTab, DOMContentLoaded)
+```
+
+- Script load order in `index.html` is **critical**: `uplot.min.js` → `formatters.js` →
+  `metrics.js` → `store.js` → `charts.js` → `dashboard.js`.
+- No bundler, no ES modules — everything is IIFE globals with `var`.
+- History is persisted in the browser via `localStorage` (`history.v2` key),
+  debounced to every 30 seconds (not the 5-second poll interval). Flushed on
+  `beforeunload`. Auto-purged on page init if corrupt.
+
+### Adding a new static file
+
+1. Add to `EMBED_FILES` in `main/CMakeLists.txt`.
+2. Add `extern const uint8_t <name>_start[] asm("_binary_<flat_name>_start")`
+   in `main/utils/web_API.c`.
+3. Add a row to `s_files[]` mapping the URI to the start/end symbols.
+4. If JS/CSS, add `<script>`/`<link>` in `index.html`.
+
+**Gotcha**: `EMBED_FILES` flattens subdirectories — the symbol for
+`web/js/formatters.js` is `_binary_formatters_js_start`, **not**
+`_binary_web_js_formatters_js_start`. The `web/js/` prefix is stripped.
+After adding new files, run `idf.py fullclean` to regenerate the `.S` objects.
+
 ## Project path
 
 ```

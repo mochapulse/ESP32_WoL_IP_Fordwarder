@@ -18,9 +18,13 @@ an embedded `.env` file — no recompile needed for Wi-Fi or port changes.
  │ ★ WoL Cfg│ │ MAC     3C:8A:1F:A3:D2:74            │ │
  │          │ └──────────────────────────────────────┘ │
  │          │ ┌─ Memory ─────────────────────────────┐ │
- │          │ │ Heap Free   212 kB   Heap Total 320 kB│ │
- │          │ │ Min Free    198 kB   Free Stack  12 kB│ │
- │          │ │ Tasks   14          Uptime    2m 34s  │ │
+ │          │ │ Heap Free 212 kB    Heap Total 320 kB │ │
+ │          │ │ Min Free  198 kB    Free Stack  12 kB │ │
+ │          │ │ Tasks   14           Uptime  2m 34s   │ │
+ │          │ └──────────────────────────────────────┘ │
+ │          │ ┌─ Metrics (2×2 uPlot charts) ────────┐  │
+ │          │ │ Heap Free/Min     Wi-Fi RSSI -55 dBm│  │
+ │          │ │ Tasks    10       Free Stack 2.1 kB │  │
  │          │ └──────────────────────────────────────┘ │
  │          │ ┌─ Device ─┐ ┌─ Firmware ─────────────┐ │
  │  .1.9    │ │ ESP32    │ │ lan-controller-esp32 │ │
@@ -55,9 +59,17 @@ an embedded `.env` file — no recompile needed for Wi-Fi or port changes.
     ├── .env               # Wi-Fi credentials (gitignored)
     ├── web/
     │   ├── index.html     # Sidebar + tabbed dashboard
-    │   ├── style.css      # Dark theme, responsive sidebar
-    │   ├── app.js         # Tab switching, status polling, uPlot chart
-    │   └── uplot.min.js/.css  # Vendored uPlot 1.6.32 (51 KB, MIT)
+    │   ├── uplot.min.js   # Vendored uPlot 1.6.32 (51 KB, MIT)
+    │   ├── uplot.min.css  # Vendored uPlot base styles (2 KB)
+    │   ├── css/
+    │   │   ├── layout.css      # Reset, variables, sidebar, bottombar, breakpoints
+    │   │   └── components.css  # Cards, forms, chart grid, error, placeholders
+    │   └── js/
+    │       ├── formatters.js   # fmtBytes, fmtUptime, fmtFreq, fmtRssi
+    │       ├── metrics.js      # METRICS registry, CHARTS definitions, constants
+    │       ├── store.js        # Ring buffer, pushSample, load/saveHistory (debounced)
+    │       ├── charts.js       # uPlot init, setData, resize — 4-chart 2×2 grid
+    │       └── dashboard.js    # Token auth, status polling, tab switching, DOM init
     └── utils/
         ├── dotenv.h / .c  # Embedded .env parser
         ├── wifi_connect.h/c # Wi-Fi STA lifecycle
@@ -109,6 +121,7 @@ Displays real-time ESP32 metadata fetched from `/api/status` every 5 seconds:
 |---------|--------|
 | Network | Wi-Fi state, LAN IP, MAC address |
 | Memory | Heap free/total/min, free stack, task count, uptime |
+| Metrics | 4 uPlot time-series charts in a 2×2 grid — Heap (free + min free), Wi-Fi RSSI, Task count, Free stack. 30-min ring buffer persisted to browser `localStorage` (debounced every 30 s). |
 | Device | Chip model, cores, revision, CPU freq, flash size, features |
 | Firmware | App name, version, build date |
 
@@ -127,8 +140,15 @@ All inputs are currently disabled — backend not implemented.
 |--------|-----|----------|
 | `GET` | `/` | Dashboard HTML |
 | `GET` | `/index.html` | Dashboard HTML |
-| `GET` | `/style.css` | Stylesheet |
-| `GET` | `/app.js` | Client JavaScript |
+| `GET` | `/css/layout.css` | Layout + breakpoints |
+| `GET` | `/css/components.css` | Cards, forms, charts |
+| `GET` | `/js/formatters.js` | Formatting helpers |
+| `GET` | `/js/metrics.js` | Chart config + constants |
+| `GET` | `/js/store.js` | Ring buffer + persistence |
+| `GET` | `/js/charts.js` | uPlot init + update |
+| `GET` | `/js/dashboard.js` | Auth + polling + tabs |
+| `GET` | `/uplot.min.js` | uPlot 1.6.32 |
+| `GET` | `/uplot.min.css` | uPlot base styles |
 | `POST` | `/api/wol` | Trigger WoL packet, returns `{"ok":true}` or `{"ok":false}` |
 | `GET` | `/api/wol` | Same behavior as POST |
 | `GET` | `/api/status` | JSON with full device metadata |
@@ -150,6 +170,7 @@ safety threshold, API routes return `503 Service Unavailable`.
 {
   "wifi": true,
   "ip": "192.168.1.9",
+  "wifi_rssi": -55,
   "mac": "3C:8A:1F:A3:D2:74",
   "heap_free": 215460,
   "heap_min_free": 198216,
