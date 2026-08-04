@@ -23,14 +23,19 @@ extern "C" {
  * wifi_connect() can be driven asynchronously. The Wi-Fi stack is left in
  * STOPPED state; call wifi_connect() to start scanning.
  *
- * @param ssid      Wi-Fi SSID (copied into wifi_config_t).
- * @param password  Wi-Fi password (copied into wifi_config_t).
+ * @param ssid       Wi-Fi SSID (copied into wifi_config_t).
+ * @param password   Wi-Fi password (copied into wifi_config_t).
+ * @param static_ip  Optional fixed LAN IPv4 (dotted-decimal). When set,
+ *                   the DHCP client is stopped and this address is applied
+ *                   statically (gateway derived as x.y.z.1, netmask
+ *                   255.255.255.0). NULL or empty → DHCP.
  * @return
  *  - ESP_OK on success.
  *  - ESP_ERR_INVALID_ARG if ssid or password is NULL.
  *  - Other esp_err_t propagated from NVS, netif, event loop, or wifi init.
  */
-esp_err_t wifi_init(const char *ssid, const char *password);
+esp_err_t wifi_init(const char *ssid, const char *password,
+                    const char *static_ip);
 
 /**
  * @brief   Start the Wi-Fi station.

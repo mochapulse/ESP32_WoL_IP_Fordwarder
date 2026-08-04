@@ -87,7 +87,8 @@ void app_main(void)
     }
 
     /* ── Wi-Fi ───────────────────────────────────────────────── */
-    ESP_ERROR_CHECK(wifi_init(ssid, passwd));
+    const char *esp_ip = dotenv_get("ESP_IP");
+    ESP_ERROR_CHECK(wifi_init(ssid, passwd, esp_ip));
     ESP_ERROR_CHECK(wifi_connect());
 
     const char *lan_ip = wifi_wait_for_ip(IP_WAIT_TIMEOUT_MS);

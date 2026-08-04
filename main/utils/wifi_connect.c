@@ -37,6 +37,60 @@ static const char *TAG = "wifi_connect";
 static EventGroupHandle_t s_wifi_event_group;   /**< Owned by wifi_init() */
 static bool               s_retrying;           /**< Guard against stacked retries */
 static char               s_ip_str[16];         /**< Last known dotted-decimal IP */
+static esp_netif_t       *s_sta_netif;          /**< Owned by wifi_init() */
+
+/* ── Static IP helper ──────────────────────────────────────────── */
+
+/**
+ * @brief Stop DHCP on the STA netif and apply @p static_ip.
+ *
+ * Gateway is derived as x.y.z.1 and netmask is fixed to 255.255.255.0.
+ * Invalid input is rejected with a warning and falls back to DHCP.
+ *
+ * @param static_ip  Dotted-decimal IPv4, or NULL/empty for DHCP.
+ * @return ESP_OK always unless a netif call fails (propagated).
+ */
+static esp_err_t apply_static_ip(const char *static_ip)
+{
+    if (!static_ip || static_ip[0] == '\0') {
+        return ESP_OK; /* DHCP default */
+    }
+
+    esp_ip4_addr_t ip;
+    if (esp_netif_str_to_ip4(static_ip, &ip) != ESP_OK) {
+        ESP_LOGW(TAG, "Invalid static IP '%s' — falling back to DHCP",
+                 static_ip);
+        return ESP_OK;
+    }
+
+    esp_netif_ip_info_t ip_info = { 0 };
+    ip_info.ip = ip;
+
+    char gw_str[16];
+    snprintf(gw_str, sizeof(gw_str), "%d.%d.%d.1",
+             esp_ip4_addr1(&ip), esp_ip4_addr2(&ip), esp_ip4_addr3(&ip));
+    if (esp_netif_str_to_ip4(gw_str, &ip_info.gw) != ESP_OK ||
+        esp_netif_str_to_ip4("255.255.255.0", &ip_info.netmask) != ESP_OK) {
+        ESP_LOGW(TAG, "Failed to build static IP info — falling back to DHCP");
+        return ESP_OK;
+    }
+
+    esp_err_t ret = esp_netif_dhcpc_stop(s_sta_netif);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to stop DHCP client: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    ret = esp_netif_set_ip_info(s_sta_netif, &ip_info);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set static IP: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    ESP_LOGI(TAG, "Static IP configured: %s (gw " IPSTR ", netmask " IPSTR ")",
+             static_ip, IP2STR(&ip_info.gw), IP2STR(&ip_info.netmask));
+    return ESP_OK;
+}
 
 /* ── Event handler ─────────────────────────────────────────────── */
 
@@ -73,7 +127,8 @@ static void event_handler(void *arg,
 
 /* ── Public API ───────────────────────────────────────────────── */
 
-esp_err_t wifi_init(const char *ssid, const char *password)
+esp_err_t wifi_init(const char *ssid, const char *password,
+                    const char *static_ip)
 {
     if (!ssid || !password) {
         return ESP_ERR_INVALID_ARG;
@@ -92,7 +147,16 @@ esp_err_t wifi_init(const char *ssid, const char *password)
 
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
+    s_sta_netif = esp_netif_create_default_wifi_sta();
+    if (!s_sta_netif) {
+        ESP_LOGE(TAG, "Failed to create default Wi-Fi station netif");
+        return ESP_FAIL;
+    }
+
+    ret = apply_static_ip(static_ip);
+    if (ret != ESP_OK) {
+        return ret;
+    }
 
     s_wifi_event_group = xEventGroupCreate();
     if (!s_wifi_event_group) {
